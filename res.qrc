@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>wifi.ico</file>
+        <file>wifi_off.ico</file>
+        <file>wifi_on.ico</file>
+        <file>wifi_err.ico</file>
+        <file>wifi_beep.ico</file>
+        <file>wifi_timer.ico</file>
+    </qresource>
+</RCC>

@@ -4,7 +4,6 @@
 #include <QtWidgets>
 #include <QObject>
 #include "switch.h"
-#include "pushbutton.h"
 #include "wifimanager.h"
 #include <QHBoxLayout>
 #include <QLockFile>
@@ -45,7 +44,6 @@ private slots:
 private:
     bool isOnButtonCloseEvent();
     int CloseEventType = BUTTON_CLOSE;
-    PushButton *_backgroundButton;
     QPushButton *_createTimerButton;
     Wifimanager *_wifiManager;
     Switch *switcher2_4;
@@ -54,7 +52,6 @@ private:
     QTimer *_wifiRequestTimer;
     QHBoxLayout *_layout;
     QLockFile *_lockFile;
-    PushButton *_timerButton;
     QLabel *errLabel;
 
 

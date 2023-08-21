@@ -12,7 +12,6 @@ SOURCES += \
     auth.cpp \
     main.cpp \
     ontimeswitcher.cpp \
-    pushbutton.cpp \
     request.cpp \
     switch.cpp \
     widget.cpp \
@@ -21,7 +20,6 @@ SOURCES += \
 HEADERS += \
     auth.h \
     ontimeswitcher.h \
-    pushbutton.h \
     request.h \
     switch.h \
     widget.h \
@@ -30,7 +28,7 @@ HEADERS += \
 FORMS += \
     auth.ui
 
-RC_ICONS = wifi.ico
+RC_ICONS = src/icons/wifi.ico
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

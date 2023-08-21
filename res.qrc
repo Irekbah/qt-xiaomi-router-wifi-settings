@@ -1,10 +1,10 @@
 <RCC>
     <qresource prefix="/img">
-        <file>wifi.ico</file>
-        <file>wifi_off.ico</file>
-        <file>wifi_on.ico</file>
-        <file>wifi_err.ico</file>
-        <file>wifi_beep.ico</file>
-        <file>wifi_timer.ico</file>
+        <file alias="wifi.ico">src/icons/wifi.ico</file>
+        <file alias="wifi_beep.ico">src/icons/wifi_beep.ico</file>
+        <file alias="wifi_err.ico">src/icons/wifi_err.ico</file>
+        <file alias="wifi_off.ico">src/icons/wifi_off.ico</file>
+        <file alias="wifi_on.ico">src/icons/wifi_on.ico</file>
+        <file alias="wifi_timer.ico">src/icons/wifi_timer.ico</file>
     </qresource>
 </RCC>

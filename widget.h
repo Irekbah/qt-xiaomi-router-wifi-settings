@@ -16,6 +16,7 @@ class Widget : public QWidget
     Q_OBJECT
 public:
     Widget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags(), bool hide = false, QHBoxLayout *layout = nullptr);
+    ~Widget();
     static const int BUTTON_CLOSE = 0;
     static const int CONTEXT_MENU_CLOSE = 1;
     void setCloseEventType(const int);
@@ -53,7 +54,7 @@ private:
     QHBoxLayout *_layout;
     QLockFile *_lockFile;
     QLabel *errLabel;
-
+    QGridLayout *_gridLayout = nullptr;
 
 protected:
     void closeEvent(QCloseEvent *) override;

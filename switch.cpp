@@ -6,14 +6,12 @@ _opacity(0.000),
 _switch(false),
 _margin(3),
 _thumb("#D5D5D5"),
-_anim(new QPropertyAnimation(this, "offset", this))
+_anim(animation)
 {
-
     _anim->setDuration(120);
     setOffset(_height / 2);
     _y = _height / 2;
     setBrush(QColor("#009688"));
-
 }
 
 Switch::Switch(const QBrush &brush, QWidget *parent) : QAbstractButton(parent),
@@ -22,7 +20,7 @@ _switch(false),
 _opacity(0.000),
 _margin(3),
 _thumb("#D5D5D5"),
-_anim(new QPropertyAnimation(this, "offset", this))
+_anim(animation)
 {
     setOffset(_height / 2);
     _y = _height / 2;
@@ -34,7 +32,6 @@ Switch::~Switch()
 
 void Switch::setCheck(bool state)
 {
-    qDebug() << "\nSIGNAL BOOL STATE = " << state << "\n";
     bool animate = true;
     if (_switch==state) animate = false;
         _switch = state;
@@ -76,6 +73,7 @@ void Switch::paintEvent(QPaintEvent *e) {
         p.setBrush(QColor("#BDBDBD"));
         p.drawEllipse(QRectF(offset() - (_height / 2), _y - (_height / 2), height(), height()));
     }
+    e->ignore();
 }
 
 void Switch::mouseReleaseEvent(QMouseEvent *e) {
@@ -83,23 +81,17 @@ void Switch::mouseReleaseEvent(QMouseEvent *e) {
         _switch = !_switch;
         setCheck(_switch);
         emit switcherClicked(_switch);
-        //mainwindow - connect signal switched to switchWifi(_switch)
-//        switchWifi(_switch);
     }
     QAbstractButton::mouseReleaseEvent(e);
-    emit mouseReleased(e);
+    e->ignore();
 }
 
-void Switch::enterEvent(QEvent *e) {
+void Switch::enterEvent(QEnterEvent *e) {
     setCursor(Qt::PointingHandCursor);
-    QAbstractButton::event(e);
+    //QAbstractButton::event(nullptr);
+    e->ignore();
 }
 
 QSize Switch::sizeHint() const {
     return QSize(2 * (_height + _margin), _height + 2 * _margin);
-}
-
-void Switch::onButtonReleased()
-{
-    mouseReleaseEvent(new QMouseEvent(QEvent::MouseButtonRelease,*(new QPointF()), *(new QPointF()), *(new QPointF()), Qt::LeftButton, Qt::MouseButtons(), Qt::KeyboardModifiers()));
 }

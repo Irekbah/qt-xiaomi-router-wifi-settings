@@ -6,8 +6,7 @@ Request::Request(QUrl url, int initRequestType) : QNetworkRequest(url), requestT
 void Request::setUrl(const QUrl &url, const int RequestType)
 {
     QNetworkRequest::setUrl(url);
-    qDebug() << "\n\nQNetworkRequest::setUrl(url): " << this->url().toString();
-    qDebug() << "\nRequestType: " << RequestType;
+    qDebug() << "URL: " << this->url().toString();
     setRequestType(RequestType);
 }
 

@@ -11,6 +11,7 @@ CONFIG += c++11
 SOURCES += \
     auth.cpp \
     main.cpp \
+    networkmanager.cpp \
     ontimeswitcher.cpp \
     request.cpp \
     switch.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
     auth.h \
+    networkmanager.h \
     ontimeswitcher.h \
     request.h \
     switch.h \

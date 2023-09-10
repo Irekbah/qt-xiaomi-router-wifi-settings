@@ -50,11 +50,11 @@ Widget::Widget(QWidget *parent, Qt::WindowFlags f,bool hide, QHBoxLayout *layout
     connect(_wifiManager, &Wifimanager::wifi5StateResult, switcher5, &Switch::setCheck);
     connect(switcher2_4, &Switch::switcherClicked, _wifiManager, &Wifimanager::switch2_4Wifi);
     connect(switcher5, &Switch::switcherClicked, _wifiManager, &Wifimanager::switch5Wifi);
-    connect(_wifiRequestTimer, &QTimer::timeout, _wifiManager, &Wifimanager::updateStateWifi);
+    connect(_wifiRequestTimer, &QTimer::timeout, _wifiManager, &Wifimanager::checkWifiState);
     connect(this, SIGNAL(silentModeOn()), this, SLOT(onSilentModeOn()));
     _wifiRequestTimer->start();
-
-    _wifiManager->updateStateWifi();
+    
+    _wifiManager->checkWifiState();
 }
 
 Widget::~Widget()
@@ -71,10 +71,10 @@ Widget::~Widget()
 
 void Widget::setCloseEventType(const int eventType)
 {
-    //if (eventType == BUTTON_CLOSE || eventType == CONTEXT_MENU_CLOSE)
+    if (eventType == BUTTON_CLOSE || eventType == CONTEXT_MENU_CLOSE)
         CloseEventType = eventType;
-//    else
-//        throw std::runtime_error(std::to_string(eventType) + " event type not supported");
+    else
+        throw std::runtime_error(std::to_string(eventType) + " event type not supported");
 }
 
 bool Widget::isOnButtonCloseEvent(){return CloseEventType==BUTTON_CLOSE;}

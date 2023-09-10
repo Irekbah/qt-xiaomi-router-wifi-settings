@@ -1,5 +1,7 @@
 #include "wifimanager.h"
 #include "auth.h"
+#include "networkmanager.h"
+#include <QNetworkReply>
 
 const QString Wifimanager::MIROUTERKEY = QString("a2ffa5c9be07488bbb04a3a47d3c5f6a");
 
@@ -23,19 +25,12 @@ _widgetParent(parent)
 
     //end icon
 
-    _req = new Request(QUrl(requestUrl), Request::WIFI_STATE_REQUEST);
-    man = new NetworkManager();
-
     loginToRouter();
 }
 
 Wifimanager::~Wifimanager()
 {
     _trayIcon->hide();
-    delete _config;
-    delete _authinfo;
-    delete man;
-    delete _req;
     delete _trayIconMenu;
     delete _createNewTimer;
     delete _quitAction;
@@ -55,19 +50,28 @@ bool Wifimanager::isLastWifiStateEquals(WifiState state)
 int Wifimanager::switchWifi(int index, bool state)
 {
     switchWifiStateProcessing = true;
-    QString reqStr = _authinfo->hostname + "/cgi-bin/luci/;stok=";
-    reqStr.append(_token);
-    reqStr.append("/api/xqnetwork/set_wifi?wifiIndex=");
-    reqStr.append(QString::number(index));
-    reqStr.append("&on=");
-    reqStr.append(state ? "1" : "0");
-    reqStr.append("&encryption=mixed-psk&channel=0&bandwidth=0&hidden=0&txpwr=max");
-    _req->setUrl(QUrl(reqStr), Request::WIFI_STATE_CHANGE);
-    QNetworkReply *reply = man->get(*_req);
-    delete reply;
-    if (_lastWifi2_4State!=WifiState::WifiError)
-        showMessage(state ? "Wi-Fi Теперь ВКЛЮЧЕН." : "Wi-Fi Теперь ВЫКЛЮЧЕН.", state ? WifiState::WifiOn : WifiState::WifiOff);
-    _lastWifi2_4State = state ? WifiState::WifiOn : WifiState::WifiOff;
+    try {
+        QString reqStr = _authinfo.hostname + "/cgi-bin/luci/;stok=";
+        reqStr.append(_token);
+        reqStr.append("/api/xqnetwork/set_wifi?wifiIndex=");
+        reqStr.append(QString::number(index));
+        reqStr.append("&on=");
+        reqStr.append(state ? "1" : "0");
+        reqStr.append("&encryption=mixed-psk&channel=0&bandwidth=0&hidden=0&txpwr=max");
+        QNetworkRequest req;
+        req.setUrl(QUrl(reqStr));
+        NetworkManager networkMan;
+        QNetworkReply *reply = networkMan.get(req);
+        if (reply->error())
+        {
+            emit wifi2_4StateResult(false);
+            emit wifi5StateResult(false);
+        }
+        delete reply;
+        if (_lastWifi2_4State!=WifiState::WifiError)
+            showMessage(state ? "Wi-Fi Теперь ВКЛЮЧЕН." : "Wi-Fi Теперь ВЫКЛЮЧЕН.", state ? WifiState::WifiOn : WifiState::WifiOff);
+        _lastWifi2_4State = state ? WifiState::WifiOn : WifiState::WifiOff;
+    } catch (std::exception exc){}
     switchWifiStateProcessing = false;
 
     return 0;
@@ -91,44 +95,45 @@ void Wifimanager::deactivateTrayIcon()
     _trayIcon->hide();
 }
 
-Wifimanager::WifiInfo Wifimanager::updateStateWifi()
+Wifimanager::WifiInfo Wifimanager::checkWifiState()
 {
-    //if (switchWifiStateProcessing || !_authinfo->authentication) return;
+    //if (switchWifiStateProcessing || !_authinfo.authentication) return;
+    while(switchWifiStateProcessing)
+    {
+        sleep(100);
+    }
     WifiInfo wifiInfo;
-    _req->setUrl(QUrl(requestUrl), Request::WIFI_STATE_REQUEST);
+    QNetworkRequest req;
+    req.setUrl(QUrl(requestUrl));
     QString ua("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 YaBrowser/21.6.1.274 Yowser/2.5 Safari/537.36");
-    _req->setHeader(Request::UserAgentHeader, QVariant(ua));
-    _req->setHeader(Request::IfModifiedSinceHeader, QVariant("Sun, 04 Jan 1970 03:41:42 GMT"));
+    req.setHeader(QNetworkRequest::UserAgentHeader, QVariant(ua));
+    req.setHeader(QNetworkRequest::IfModifiedSinceHeader, QVariant("Sun, 04 Jan 1970 03:41:42 GMT"));
     changeIcon(WifiState::WifiBeep);
-    QNetworkReply *reply = man->get(*_req);
+    NetworkManager networkMan;
+    QNetworkReply *reply = networkMan.get(req);
     if (reply->error())
     {
         wifiInfo.error = true;
         qDebug()<<"ERROR ";
         qDebug()<<reply->errorString();
-        delete reply;
+        reply->deleteLater();
         if(!isLastWifiStateEquals(WifiState::WifiError))
         {
             _widgetParent->showErrLabel(true);
             routerError();
         }
-        if (!_req->isStateRequest())
-        {
-            emit wifi2_4StateResult(false);
-            emit wifi5StateResult(false);
-        }
     }
     else
     {
         QString responseText = reply->readAll();
-        delete reply;
+        reply->deleteLater();
         if (responseText.indexOf("Invalid token")>=0)
         {
-            _authinfo->authentication = false;
+            _authinfo.authentication = false;
             loginToRouter();
             if (!isLastWifiStateEquals(WifiState::WifiError))
                 routerError();
-            QTimer::singleShot(1000, this, &Wifimanager::updateStateWifi);
+            QTimer::singleShot(1000, this, &Wifimanager::checkWifiState);
             wifiInfo.error = true;
             return wifiInfo;
         }
@@ -175,7 +180,7 @@ void Wifimanager::routerError()
     showMessage("Нет доступа к роутеру.", WifiState::WifiError);
     _lastWifi2_4State = WifiState::WifiError;
     _lastWifi5State = WifiState::WifiError;
-    _authinfo->authentication = false;
+    _authinfo.authentication = false;
 }
 
 //icon
@@ -185,7 +190,7 @@ void Wifimanager::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
     {
         case QSystemTrayIcon::DoubleClick:
             _widgetParent->show();
-            updateStateWifi();
+        checkWifiState();
             _widgetParent->setUpdateInterval(Widget::INTERVAL_ON_SHOWED);
             break;
         default:
@@ -244,6 +249,8 @@ void Wifimanager::deleteTimerAction(OnTimeSwitcher* window)
     QAction *action = _timerWindowsMap.key(window);
     _timerWindowsMap.remove(action);
     _trayIconMenu->removeAction(action);
+    disconnect(window, nullptr, nullptr, nullptr);
+    disconnect(action, nullptr, nullptr, nullptr);
     window->deleteLater();
     action->deleteLater();
 }
@@ -257,22 +264,23 @@ bool Wifimanager::loginToRouter()
     {
         AuthInfo authinfo = readConfig();
         //delete _authinfo;
-        *_authinfo = AuthInfo(authinfo);
+        _authinfo = AuthInfo(authinfo);
 
         QString nonce = getNonce(getRandomMAC("e4:46:da"));
         QEventLoop loop;
         connect(loginNetworkManager, SIGNAL(finished(QNetworkReply*)), &loop, SLOT(quit()));
-        QString url1 = QString(_authinfo->hostname + "/cgi-bin/luci/api/xqsystem/login");
+        QString url1 = QString(_authinfo.hostname + "/cgi-bin/luci/api/xqsystem/login");
         QUrlQuery postData;
-        postData.addQueryItem("username", _authinfo->username);
-        _authinfo->password = getPasswordHash(nonce, _authinfo->password);
-        postData.addQueryItem("password", _authinfo->password);
+        postData.addQueryItem("username", _authinfo.username);
+        _authinfo.password = getPasswordHash(nonce, _authinfo.password);
+        postData.addQueryItem("password", _authinfo.password);
         postData.addQueryItem("logtype" ,"2");
         postData.addQueryItem("nonce", nonce);
         loginRequest = new QNetworkRequest(QUrl(url1));
         loginRequest->setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
         loginReply = loginNetworkManager->post(*loginRequest, postData.toString(QUrl::FullyEncoded).toUtf8());
         loop.exec();
+        disconnect(loginNetworkManager, SIGNAL(finished(QNetworkReply*)), nullptr, nullptr);
         if (loginReply->error() == QNetworkReply::NoError)
         {
             QString replyText = loginReply->readAll();
@@ -280,7 +288,7 @@ bool Wifimanager::loginToRouter()
             _token = replyText.remove(0, replyText.indexOf("token")+8);
             _token = _token.remove(_token.indexOf("\""), _token.length());
             qDebug() << "TOKEN: " << _token;
-            requestUrl = QString(_authinfo->hostname + "/cgi-bin/luci/;stok=" + _token + "/api/xqnetwork/wifi_detail_all");
+            requestUrl = QString(_authinfo.hostname + "/cgi-bin/luci/;stok=" + _token + "/api/xqnetwork/wifi_detail_all");
 
             askSSID();
             qDebug() << "SSID: " << _ssid[0];
@@ -300,6 +308,15 @@ bool Wifimanager::loginToRouter()
     delete loginReply;
     delete loginNetworkManager;
     return false;
+}
+
+void Wifimanager::sleep(int ms)
+{
+    QEventLoop loop;
+    QTimer t;
+    t.connect(&t, &QTimer::timeout, &loop, &QEventLoop::quit);
+    t.start(ms);
+    loop.exec();
 }
 
 QString Wifimanager::sha1(QString str)
@@ -331,9 +348,10 @@ QString Wifimanager::askSSID()
     QNetworkRequest req;
     req.setUrl(QUrl(requestUrl));
     QString ua("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 YaBrowser/21.6.1.274 Yowser/2.5 Safari/537.36");
-    req.setHeader(Request::UserAgentHeader, QVariant(ua));
-    req.setHeader(Request::IfModifiedSinceHeader, QVariant("Sun, 04 Jan 1970 03:41:42 GMT"));
-    QNetworkReply *reply = man->get(req);
+    req.setHeader(QNetworkRequest::UserAgentHeader, QVariant(ua));
+    req.setHeader(QNetworkRequest::IfModifiedSinceHeader, QVariant("Sun, 04 Jan 1970 03:41:42 GMT"));
+    NetworkManager networkMan;
+    QNetworkReply *reply = networkMan.get(req);
     if (reply->error())
     {
         qDebug()<<"ERROR ";
@@ -398,23 +416,25 @@ QIcon Wifimanager::changeIcon(const WifiState icon)
 
 Wifimanager::AuthInfo Wifimanager::readConfig()
 {
-    if (!_config->open(QIODevice::ReadOnly))
+    QFile config(CONFIG_FILE);
+    if (!config.open(QIODevice::ReadOnly))
     {
         Auth *auth = new Auth();
         QEventLoop loop;
         connect(auth, SIGNAL(closed()), &loop, SLOT(quit()));
         auth->show();
         loop.exec();
+        disconnect(auth, SIGNAL(closed()), nullptr, nullptr);
         delete auth;
     }
     else
     {
-        _config->close();
+        config.close();
     }
-    if (_config->open(QIODevice::ReadOnly))
+    if (config.open(QIODevice::ReadOnly))
     {
-        QByteArray bytes = _config->readAll();
-        _config->close();
+        QByteArray bytes = config.readAll();
+        config.close();
 
         QJsonParseError jsonError;
         QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);

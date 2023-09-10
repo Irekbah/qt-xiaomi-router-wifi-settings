@@ -4,10 +4,9 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QtWidgets>
-#include "request.h"
 #include "widget.h"
 #include "ontimeswitcher.h"
-#include "networkmanager.h"
+
 #define ICON_ON 1
 #define ICON_OFF 0
 #define ICON_ERR -1
@@ -39,12 +38,13 @@ public:
     QString requestUrl = "http://router.miwifi.com/cgi-bin/luci/;stok=/api/xqnetwork/wifi_detail_all";
 
     bool isLastWifiStateEquals(WifiState);
-    WifiInfo updateStateWifi();
+    WifiInfo checkWifiState();
 
     int switchWifi(int index, bool state);
     int switch2_4Wifi(bool);
     int switch5Wifi(bool);
 
+    //icon
     void deactivateTrayIcon();
 
 signals:
@@ -52,8 +52,8 @@ signals:
     void wifi5StateResult(bool);
 
 public slots:
+    //widg
     void onCreateNewTimer();
-    //
 
 private slots:
 
@@ -72,8 +72,7 @@ private:
     Widget *_widgetParent = nullptr;
     WifiState _lastWifi2_4State = WifiState::WifiIsNotChecked;
     WifiState _lastWifi5State = WifiState::WifiIsNotChecked;
-    Request *_req = nullptr;
-    NetworkManager *man = nullptr;
+    void sleep(int ms);
 
     QString sha1(QString str);
     QString getRandomMAC(QString);
@@ -101,8 +100,6 @@ private:
         G5 = 2
     };
 
-    QFile *_config = new QFile(CONFIG_FILE);
-
     class AuthInfo
     {
     public:
@@ -117,7 +114,7 @@ private:
     };
 
 
-    AuthInfo *_authinfo = new AuthInfo();
+    AuthInfo _authinfo;
     AuthInfo readConfig();
 
 };

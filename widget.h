@@ -45,15 +45,15 @@ private slots:
 private:
     bool isOnButtonCloseEvent();
     int CloseEventType = BUTTON_CLOSE;
-    QPushButton *_createTimerButton;
-    Wifimanager *_wifiManager;
-    Switch *switcher2_4;
-    Switch *switcher5;
+    QPushButton *_createTimerButton = nullptr;
+    Wifimanager *_wifiManager = nullptr;
+    Switch *switcher2_4 = nullptr;
+    Switch *switcher5 = nullptr;
     //mainwindow
-    QTimer *_wifiRequestTimer;
-    QHBoxLayout *_layout;
-    QLockFile *_lockFile;
-    QLabel *errLabel;
+    QTimer *_wifiRequestTimer = nullptr;
+    QHBoxLayout *_layout = nullptr;
+    QLockFile *_lockFile = nullptr;
+    QLabel *errLabel = nullptr;
     QGridLayout *_gridLayout = nullptr;
 
 protected:

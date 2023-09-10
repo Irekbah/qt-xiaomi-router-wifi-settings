@@ -1,25 +1,25 @@
 #include "switch.h"
 
-Switch::Switch(QWidget *parent) : QAbstractButton(nullptr),
-_height(16),
-_opacity(0.000),
+Switch::Switch(QWidget *) : QAbstractButton(nullptr),
 _switch(false),
+_opacity(0.000),
+_height(16),
 _margin(3),
-_thumb("#D5D5D5"),
+_thumb(QColor(0xD5, 0xD5, 0xD5)),
 _anim(animation)
 {
     _anim->setDuration(120);
     setOffset(_height / 2);
     _y = _height / 2;
-    setBrush(QColor("#009688"));
+    setBrush(QColor(0x00, 0x96, 0x88));
 }
 
 Switch::Switch(const QBrush &brush, QWidget *parent) : QAbstractButton(parent),
-_height(16),
 _switch(false),
 _opacity(0.000),
+_height(16),
 _margin(3),
-_thumb("#D5D5D5"),
+_thumb(QColor(0xD5, 0xD5, 0xD5)),
 _anim(animation)
 {
     setOffset(_height / 2);
@@ -35,7 +35,7 @@ void Switch::setCheck(bool state)
     bool animate = true;
     if (_switch==state) animate = false;
         _switch = state;
-        _thumb = state ? _brush : QBrush("#D5D5D5");
+        _thumb = state ? _brush : QBrush(QColor(0xD5, 0xD5, 0xD5));
         if (state) {
             _anim->setStartValue(_height / 2);
             _anim->setEndValue(width() - _height);
@@ -70,7 +70,7 @@ void Switch::paintEvent(QPaintEvent *e) {
         p.setOpacity(0.12);
         p.drawRoundedRect(QRect(_margin, _margin, width() - 2 * _margin, height() - 2 * _margin), 8.0, 8.0);
         p.setOpacity(1.0);
-        p.setBrush(QColor("#BDBDBD"));
+        p.setBrush(QColor(0xBD, 0xBD, 0xBD));
         p.drawEllipse(QRectF(offset() - (_height / 2), _y - (_height / 2), height(), height()));
     }
     e->ignore();

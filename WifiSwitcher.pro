@@ -11,16 +11,16 @@ CONFIG += c++11
 SOURCES += \
     auth.cpp \
     main.cpp \
+    networkmanager.cpp \
     ontimeswitcher.cpp \
-    request.cpp \
     switch.cpp \
     widget.cpp \
     wifimanager.cpp
 
 HEADERS += \
     auth.h \
+    networkmanager.h \
     ontimeswitcher.h \
-    request.h \
     switch.h \
     widget.h \
     wifimanager.h

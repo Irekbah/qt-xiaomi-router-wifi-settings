@@ -30,11 +30,12 @@ void Auth::onOkButton()
     QJsonDocument authJson;
     authJson.setObject(content);
     QByteArray authJsonBytes = authJson.toJson(QJsonDocument::Indented);
-    if( _config->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) )
+    QFile config(CONFIG_FILE);
+    if(config.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
-        QTextStream iStream( _config );
+        QTextStream iStream(&config);
         iStream << authJsonBytes;
-        _config->close();
+        config.close();
     }
     else
     {

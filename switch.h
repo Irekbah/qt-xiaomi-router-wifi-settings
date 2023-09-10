@@ -31,18 +31,17 @@ public:
     }
 
 signals:
-    void mouseReleased(QMouseEvent *e);
     void switcherClicked(bool);
 
 public slots:
-    void onButtonReleased();
 
 protected:
     void paintEvent(QPaintEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
-    void enterEvent(QEvent*);
+    void enterEvent(QEnterEvent*) override;
 
 private:
+    QPropertyAnimation* animation = new QPropertyAnimation(this, "offset", this);
     bool _switch;
     qreal _opacity;
     int _x, _y, _height, _margin;

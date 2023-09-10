@@ -16,6 +16,7 @@ class Widget : public QWidget
     Q_OBJECT
 public:
     Widget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags(), bool hide = false, QHBoxLayout *layout = nullptr);
+    ~Widget();
     static const int BUTTON_CLOSE = 0;
     static const int CONTEXT_MENU_CLOSE = 1;
     void setCloseEventType(const int);
@@ -44,16 +45,16 @@ private slots:
 private:
     bool isOnButtonCloseEvent();
     int CloseEventType = BUTTON_CLOSE;
-    QPushButton *_createTimerButton;
-    Wifimanager *_wifiManager;
-    Switch *switcher2_4;
-    Switch *switcher5;
+    QPushButton *_createTimerButton = nullptr;
+    Wifimanager *_wifiManager = nullptr;
+    Switch *switcher2_4 = nullptr;
+    Switch *switcher5 = nullptr;
     //mainwindow
-    QTimer *_wifiRequestTimer;
-    QHBoxLayout *_layout;
-    QLockFile *_lockFile;
-    QLabel *errLabel;
-
+    QTimer *_wifiRequestTimer = nullptr;
+    QHBoxLayout *_layout = nullptr;
+    QLockFile *_lockFile = nullptr;
+    QLabel *errLabel = nullptr;
+    QGridLayout *_gridLayout = nullptr;
 
 protected:
     void closeEvent(QCloseEvent *) override;

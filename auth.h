@@ -10,6 +10,8 @@
 #include <QCryptographicHash>
 #include <QDebug>
 
+#define CONFIG_FILE "auth.json"
+
 namespace Ui {
 class Auth;
 }
@@ -23,7 +25,6 @@ public:
     ~Auth();
 
 private:
-    QFile *_config = new QFile("auth.json");
     static const QString MIROUTERKEY;
 
     QString sha1(QString str);

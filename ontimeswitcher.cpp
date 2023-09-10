@@ -131,7 +131,7 @@ void OnTimeSwitcher::onTimeout()
 
         QThread::sleep(5);
         if (_turnOffComputerFlag->isChecked())
-            QProcess::startDetached("shutdown -s -f -t 00");
+            QProcess::startDetached("shutdown -s -t 00");
 
         this->close();
     }
